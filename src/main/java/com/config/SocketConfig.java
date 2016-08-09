@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -43,6 +42,7 @@ public class SocketConfig {
 
     public void send(String command, Message message) {
         JsonMessage jsonMessage = new JsonMessage(command, message.getUser(), message.getMessage());
+        jsonMessage.setFrom(ConnectionProperties.getProperties().getProperty("room_port"));
         String string = JsonObjectFactory.getJsonString(jsonMessage);
         printWriter.println(string);
         printWriter.flush();
@@ -73,8 +73,11 @@ public class SocketConfig {
             if (scanner.hasNextLine()) {
                 String json = scanner.nextLine();
 
-                JsonMessage objectFromJson = Optional.ofNullable(JsonObjectFactory.getObjectFromJson(json, JsonMessage.class)).orElseGet(JsonMessage::new);
-                template.convertAndSend("/topic/greetings", new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
+                JsonMessage objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
+                if (objectFromJson != null) {
+                    template.convertAndSend("/topic/greetings",
+                            new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

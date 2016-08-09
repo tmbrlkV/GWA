@@ -3,7 +3,6 @@ package com.controller;
 import com.config.SocketConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.room.util.entity.User;
-import com.room.util.json.JsonObject;
 import com.room.util.json.JsonObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
@@ -43,8 +42,8 @@ public class SignUpController {
         }
     }
 
-    // TODO: 8/9/16 auth set to/from || auth special publisher
     // TODO: 8/9/16 try to launch 2-3 rooms
+    // TODO: 8/9/16 butler proxy chat
     private User signUp(String username, String password) throws JsonProcessingException {
         SocketConfig instance = SocketConfig.getInstance();
 

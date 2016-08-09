@@ -25,14 +25,14 @@ public class CommandManager {
             try (ZMQ.Socket handler = ZmqContextHolder.getContext().socket(ZMQ.SUB)){
                 Properties properties = ConnectionProperties.getProperties();
                 handler.connect(properties.getProperty("from_butler_address"));
-                handler.subscribe("1".getBytes());
+                handler.subscribe("0".getBytes());
 
                 sender.send(request);
                 handler.recvStr();
 
                 String reply = handler.recvStr();
                 User user = JsonObjectFactory.getObjectFromJson(reply, User.class);
-                handler.unsubscribe("1".getBytes());
+                handler.unsubscribe("0".getBytes());
                 return JsonObjectFactory.getJsonString(Optional.ofNullable(user).orElse(new User()));
             } catch (Exception e) {
                 e.printStackTrace();
