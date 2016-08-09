@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Hello WebSocket</title>
+    <script src="webjars/sockjs-client/1.0.2/sockjs.js"></script>
+    <script src="webjars/stomp-websocket/2.3.3/stomp.js"></script>
+    <script src="webjars/jquery/2.2.3/jquery.js"></script>
+    <script type="text/javascript" th:inline="javascript">
+        var stompClient = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
+            document.getElementById('responseDiv').style.visibility = connected ? 'visible' : 'hidden';
+            document.getElementById('response').innerHTML = '';
+        }
+
+        function connect() {
+            var socket = new SockJS('/hello');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/greetings', function (greeting) {
+                    showGreeting(JSON.parse(greeting.body).content);
+                });
+                stompClient.subscribe('http://10.66.160.89:14000', function (greeting) {
+                    showGreeting(JSON.parse(greeting.body).content);
+                });
+            });
+        }
+
+        function init() {
+            $("#name").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    $("#sendName").click();
+                }
+            });
+
+        }
+
+        function disconnect() {
+            if (stompClient != null) {
+                stompClient.disconnect();
+            }
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function sendName() {
+            var user = [[${#httpServletRequest.remoteUser}]];
+            var message = document.getElementById('name').value;
+            if (message === "" || message == null) {
+                return;
+            }
+            stompClient.send("/app/hello", {}, JSON.stringify({'user': user, 'message': message}));
+        }
+
+        function showGreeting(message) {
+            if (message == null || message === "") return;
+            var response = document.getElementById('response');
+            response.value += message + "\n";
+            document.getElementById('name').value = "";
+            response.scrollTop = response.scrollHeight;
+        }
+
+        function clearScreen() {
+            document.getElementById('response').value = "";
+        }
+    </script>
+    <style>
+        #response {
+            color: black;
+            font-size: 12pt;
+        }
+    </style>
+</head>
+<body onload="disconnect(); init()">
+<div>
+    <div>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+    </div>
+    <form th:action="@{/logout}" method="post">
+        <h3 th:inline="text">Hello, [[${#httpServletRequest.remoteUser}]]!</h3>
+        <input type="submit" value="Sign Out" onclick="disconnect()"/>
+    </form>
+    <button onclick="clearScreen();">Clear</button>
+    <div id="responseDiv">
+        <label for="response"></label><textarea id="response" rows="10" cols="50" readonly="readonly"
+                                                disabled="disabled"></textarea>
+    </div>
+    <div id="conversationDiv">
+        <label for="name"></label><input type="text" id="name" maxlength="140"/>
+        <button id="sendName" onclick="sendName();">Send</button>
+    </div>
+</div>
+</body>
+</html>
