@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
+
 @Controller
 public class MainController {
     private static Thread thread;
@@ -26,6 +28,7 @@ public class MainController {
 
     @RequestMapping("/login")
     public ModelAndView logout() throws Exception {
+        instance = SocketConfig.getInstance();
         return new ModelAndView("login");
     }
 
@@ -44,7 +47,12 @@ public class MainController {
         if (thread == null) {
             thread = new Thread(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
-                    instance.receive(template);
+                    try {
+                        instance.receive(template);
+                    } catch (IOException e) {
+                        thread.interrupt();
+                        thread = null;
+                    }
                 }
             });
             thread.start();

@@ -19,6 +19,7 @@
         function connect() {
             var socket = new SockJS('/hello');
             stompClient = Stomp.over(socket);
+            stompClient.timeout = 15000;
             stompClient.connect({}, function (frame) {
                 setConnected(true);
                 console.log('Connected: ' + frame);

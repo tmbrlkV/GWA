@@ -10,19 +10,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.Properties;
-import java.util.Scanner;
 
 public class SocketConfig {
-    private Logger logger = LoggerFactory.getLogger(SocketConfig.class);
-    private Socket socket;
-    private PrintWriter printWriter;
-    private Scanner scanner;
+    private static Logger logger = LoggerFactory.getLogger(SocketConfig.class);
+    private SocketChannel socket;
     private static SocketConfig instance;
+    private ByteBuffer bufferReceive = ByteBuffer.allocate(1024);
+    private ByteBuffer bufferSend = ByteBuffer.allocate(1024);
 
     public static SocketConfig getInstance() {
+        if (instance != null) {
+            logger.debug(String.valueOf(instance.socket));
+        }
         if (instance == null) {
             instance = new SocketConfig();
         }
@@ -34,9 +37,7 @@ public class SocketConfig {
             Properties properties = ConnectionProperties.getProperties();
             int port = Integer.parseInt(properties.getProperty("room_port"));
             String address = properties.getProperty("room_address");
-            socket = new Socket(address, port);
-            printWriter = new PrintWriter(socket.getOutputStream());
-            scanner = new Scanner(socket.getInputStream());
+            socket = SocketChannel.open(new InetSocketAddress(address, port));
         } catch (IOException e) {
             e.printStackTrace();
             logger.error("Bad init", e);
@@ -48,26 +49,39 @@ public class SocketConfig {
         JsonMessage jsonMessage = new JsonMessage(command, message.getUser(), message.getMessage());
         jsonMessage.setFrom(ConnectionProperties.getProperties().getProperty("room_port"));
         String string = JsonObjectFactory.getJsonString(jsonMessage);
-        printWriter.println(string);
-        printWriter.flush();
+        bufferSend.put(string.getBytes());
+        bufferSend.flip();
+        try {
+            int written = socket.write(bufferSend);
+            logger.debug("Written {} bytes.", written);
+            bufferSend.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void receive(SimpMessagingTemplate template) {
-        if (scanner.hasNextLine()) {
-            logger.debug("receive(SMT) before read");
-            String json = scanner.nextLine();
-            logger.debug("receive(SMT) after read");
+    public void receive(SimpMessagingTemplate template) throws IOException {
+        logger.debug("receive(SMT) before read");
+        int read = socket.read(bufferReceive);
+        if (read < 0) {
+            close();
+            throw new IOException();
+        }
 
-            JsonMessage objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
-            if (objectFromJson != null) {
-                template.convertAndSend("/topic/greetings",
-                        new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
-            }
+        logger.debug("receive(SMT) after read");
+
+        String json = new String(bufferReceive.array()).trim();
+        bufferReceive.clear();
+
+        JsonMessage objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
+        if (objectFromJson != null) {
+            template.convertAndSend("/topic/greetings",
+                    new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
         }
     }
 
 
-    public void close() {
+    private void close() {
         try {
             socket.close();
             instance = null;
