@@ -1,6 +1,8 @@
 package com.room.socket;
 
 import com.room.server.NioServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
 import java.nio.channels.SocketChannel;
@@ -10,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public class ReceiverSocketHandler implements Runnable {
+    private static Logger logger = LoggerFactory.getLogger(ReceiverSocketHandler.class);
     private static int CUTOFF;
     private ZMQ.Socket receiver;
     private NioServer server;
@@ -45,9 +48,9 @@ public class ReceiverSocketHandler implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             int events = poller.poll();
             if (events > 0) {
-                System.out.println(receiver.recvStr());
+                logger.debug(receiver.recvStr());
                 String reply = receiver.recvStr();
-                System.out.println(reply);
+                logger.debug(reply);
                 Consumer<SocketChannel> handler = channel -> server.send(channel, (reply + "\n").getBytes());
 
                 if (clients.size() > CUTOFF) {

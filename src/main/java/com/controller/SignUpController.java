@@ -1,6 +1,6 @@
 package com.controller;
 
-import com.config.SocketConfig;
+import com.config.DatabaseSocketConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.room.util.entity.User;
 import com.room.util.json.JsonObjectFactory;
@@ -26,26 +26,33 @@ public class SignUpController {
     public ModelAndView registration(@RequestParam String username,
                                      @RequestParam String password,
                                      @RequestParam String repeatPassword) throws Exception {
-        if (username == null || password == null || repeatPassword == null) {
+        if (isEmptyFields(username, password, repeatPassword)) {
             return new ModelAndView("redirect:/error");
         }
-        if (username.equals("") || password.equals("") || repeatPassword.equals("") || !password.equals(repeatPassword)) {
+        if (!password.equals(repeatPassword)) {
             return new ModelAndView("redirect:/error");
         }
 
         User user = signUp(username, password);
 
-        if (user.getLogin() != null && user.getPassword() != null) {
+        if (isAuthenticated(user)) {
             return new ModelAndView("redirect:/login");
         } else {
             return new ModelAndView("redirect:/error");
         }
     }
 
-    // TODO: 8/9/16 try to launch 2-3 rooms
-    // TODO: 8/9/16 butler proxy chat
+    private boolean isEmptyFields(@RequestParam String username, @RequestParam String password, @RequestParam String repeatPassword) {
+        return username == null || password == null || repeatPassword == null
+                || username.equals("") || password.equals("") || repeatPassword.equals("");
+    }
+
+    private boolean isAuthenticated(User user) {
+        return user.getLogin() != null && user.getPassword() != null;
+    }
+
     private User signUp(String username, String password) throws JsonProcessingException {
-        SocketConfig instance = SocketConfig.getInstance();
+        DatabaseSocketConfig instance = DatabaseSocketConfig.getInstance();
 
         User user = new User(username, passwordEncoder.encodePassword(password, null));
         String command = "newUser";

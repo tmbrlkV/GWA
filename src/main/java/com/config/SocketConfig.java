@@ -5,16 +5,18 @@ import com.entity.Message;
 import com.room.socket.ConnectionProperties;
 import com.room.util.json.JsonMessage;
 import com.room.util.json.JsonObjectFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Properties;
 import java.util.Scanner;
 
 public class SocketConfig {
+    private Logger logger = LoggerFactory.getLogger(SocketConfig.class);
     private Socket socket;
     private PrintWriter printWriter;
     private Scanner scanner;
@@ -37,10 +39,12 @@ public class SocketConfig {
             scanner = new Scanner(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
+            logger.error("Bad init", e);
         }
     }
 
-    public void send(String command, Message message) {
+    public void send(Message message) {
+        String command = "message";
         JsonMessage jsonMessage = new JsonMessage(command, message.getUser(), message.getMessage());
         jsonMessage.setFrom(ConnectionProperties.getProperties().getProperty("room_port"));
         String string = JsonObjectFactory.getJsonString(jsonMessage);
@@ -48,39 +52,17 @@ public class SocketConfig {
         printWriter.flush();
     }
 
-    public void send(String json) {
-        printWriter.println(json);
-        printWriter.flush();
-    }
-
-    public String receive() {
-        try {
-            InputStream inputStream = socket.getInputStream();
-            byte[] message = new byte[8000];
-            int read = inputStream.read(message);
-            if (read > 0) {
-                return new String(message).trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
     public void receive(SimpMessagingTemplate template) {
-        try {
-            scanner = new Scanner(socket.getInputStream());
-            if (scanner.hasNextLine()) {
-                String json = scanner.nextLine();
+        if (scanner.hasNextLine()) {
+            logger.debug("receive(SMT) before read");
+            String json = scanner.nextLine();
+            logger.debug("receive(SMT) after read");
 
-                JsonMessage objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
-                if (objectFromJson != null) {
-                    template.convertAndSend("/topic/greetings",
-                            new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
-                }
+            JsonMessage objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
+            if (objectFromJson != null) {
+                template.convertAndSend("/topic/greetings",
+                        new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -91,6 +73,7 @@ public class SocketConfig {
             instance = null;
         } catch (IOException e) {
             e.printStackTrace();
+            logger.error("Bad close", e);
         }
     }
 }

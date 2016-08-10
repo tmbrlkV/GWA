@@ -26,18 +26,13 @@ public class MainController {
 
     @RequestMapping("/login")
     public ModelAndView logout() throws Exception {
-        if (thread != null) {
-            thread.interrupt();
-            thread = null;
-            instance.close();
-        }
         return new ModelAndView("login");
     }
 
     @MessageMapping("/hello")
     @SendTo("/topic/greetings")
     public Greeting greeting(Message message) throws Exception {
-        instance.send("message", message);
+        instance.send(message);
         return new Greeting("");
     }
 

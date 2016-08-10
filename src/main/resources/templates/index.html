@@ -54,6 +54,7 @@
             if (message === "" || message == null) {
                 return;
             }
+            document.getElementById('name').value = "";
             stompClient.send("/app/hello", {}, JSON.stringify({'user': user, 'message': message}));
         }
 
@@ -61,7 +62,6 @@
             if (message == null || message === "") return;
             var response = document.getElementById('response');
             response.value += message + "\n";
-            document.getElementById('name').value = "";
             response.scrollTop = response.scrollHeight;
         }
 

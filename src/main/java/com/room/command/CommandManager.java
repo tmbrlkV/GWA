@@ -9,6 +9,8 @@ import com.room.util.entity.User;
 import com.room.util.json.JsonMessage;
 import com.room.util.json.JsonObject;
 import com.room.util.json.JsonObjectFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
 
 import java.util.Map;
@@ -17,12 +19,13 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandManager {
+    private static Logger logger = LoggerFactory.getLogger(CommandManager.class);
     private SenderSocketHandler sender = new SenderSocketHandler();
     private String DEFAULT_REPLY = "";
 
     private Map<String, Command> commandMap = new ConcurrentHashMap<String, Command>() {{
         Command databaseCommand = request -> {
-            try (ZMQ.Socket handler = ZmqContextHolder.getContext().socket(ZMQ.SUB)){
+            try (ZMQ.Socket handler = ZmqContextHolder.getContext().socket(ZMQ.SUB)) {
                 Properties properties = ConnectionProperties.getProperties();
                 handler.connect(properties.getProperty("from_butler_address"));
                 handler.subscribe("0".getBytes());
@@ -36,6 +39,7 @@ public class CommandManager {
                 return JsonObjectFactory.getJsonString(Optional.ofNullable(user).orElse(new User()));
             } catch (Exception e) {
                 e.printStackTrace();
+                logger.error("Bad database command", e);
             }
             return DEFAULT_REPLY;
         };
@@ -43,7 +47,6 @@ public class CommandManager {
         put(Command.GET_USER_BY_LOGIN, databaseCommand);
         put(Command.NEW_USER, databaseCommand);
         put(Command.MESSAGE, request -> {
-            System.out.println(request + " SEND");
             sender.send(request);
             return DEFAULT_REPLY;
         });
