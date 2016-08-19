@@ -1,7 +1,7 @@
-package com.config;
+package com.webroom.config;
 
-import com.entity.Greeting;
-import com.entity.Message;
+import com.webroom.entity.Greeting;
+import com.webroom.entity.Message;
 import com.room.socket.ConnectionProperties;
 import com.room.util.json.JsonMessage;
 import com.room.util.json.JsonObjectFactory;

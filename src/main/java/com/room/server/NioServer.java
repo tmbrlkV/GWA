@@ -1,5 +1,6 @@
 package com.room.server;
 
+import com.room.socket.ConnectionProperties;
 import com.room.socket.ReceiverSocketHandler;
 
 import java.io.IOException;
@@ -167,5 +168,19 @@ public class NioServer implements Runnable {
         serverChannel.register(socketSelector, SelectionKey.OP_ACCEPT);
 
         return socketSelector;
+    }
+
+    public static void main(String[] args) {
+        try {
+            Worker worker = new Worker();
+            new Thread(worker).start();
+            Properties properties = ConnectionProperties.getProperties();
+            String host = properties.getProperty("room_address");
+            int port = Integer.parseInt(properties.getProperty("room_port"));
+            InetAddress address = InetAddress.getByName(host);
+            new Thread(new NioServer(address, port, worker)).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

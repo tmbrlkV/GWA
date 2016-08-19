@@ -1,4 +1,4 @@
-package com.entity;
+package com.webroom.entity;
 
 public class SignUpUser {
     private String login;

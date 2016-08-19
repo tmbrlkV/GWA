@@ -1,4 +1,4 @@
-package com.entity;
+package com.webroom.entity;
 
 public class Message {
     private String message;

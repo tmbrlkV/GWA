@@ -1,4 +1,4 @@
-package com.config;
+package com.webroom.config;
 
 import com.room.util.entity.User;
 import com.room.util.json.JsonObjectFactory;

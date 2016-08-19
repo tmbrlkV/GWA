@@ -1,4 +1,4 @@
-package com.config;
+package com.webroom.config;
 
 import com.room.socket.ConnectionProperties;
 import org.slf4j.Logger;

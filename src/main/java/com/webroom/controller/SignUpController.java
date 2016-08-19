@@ -1,6 +1,6 @@
-package com.controller;
+package com.webroom.controller;
 
-import com.config.DatabaseSocketConfig;
+import com.webroom.config.DatabaseSocketConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.room.util.entity.User;
 import com.room.util.json.JsonObjectFactory;

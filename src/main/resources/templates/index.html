@@ -19,14 +19,10 @@
         function connect() {
             var socket = new SockJS('/hello');
             stompClient = Stomp.over(socket);
-            stompClient.timeout = 15000;
             stompClient.connect({}, function (frame) {
                 setConnected(true);
                 console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/greetings', function (greeting) {
-                    showGreeting(JSON.parse(greeting.body).content);
-                });
-                stompClient.subscribe('http://10.66.160.89:14000', function (greeting) {
                     showGreeting(JSON.parse(greeting.body).content);
                 });
             });

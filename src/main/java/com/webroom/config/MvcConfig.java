@@ -1,4 +1,4 @@
-package com.config;
+package com.webroom.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;

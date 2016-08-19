@@ -1,8 +1,8 @@
-package com.controller;
+package com.webroom.controller;
 
-import com.config.SocketConfig;
-import com.entity.Greeting;
-import com.entity.Message;
+import com.webroom.config.SocketConfig;
+import com.webroom.entity.Greeting;
+import com.webroom.entity.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
