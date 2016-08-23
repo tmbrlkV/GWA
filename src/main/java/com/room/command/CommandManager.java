@@ -6,9 +6,8 @@ import com.room.socket.ConnectionProperties;
 import com.room.socket.SenderSocketHandler;
 import com.room.socket.ZmqContextHolder;
 import com.room.util.entity.User;
-import com.room.util.json.JsonMessage;
-import com.room.util.json.JsonObject;
 import com.room.util.json.JsonObjectFactory;
+import com.room.util.json.JsonProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZMQ;
@@ -34,6 +33,7 @@ public class CommandManager {
                 handler.recvStr();
 
                 String reply = handler.recvStr();
+                logger.debug(reply);
                 User user = JsonObjectFactory.getObjectFromJson(reply, User.class);
                 handler.unsubscribe("0".getBytes());
                 return JsonObjectFactory.getJsonString(Optional.ofNullable(user).orElse(new User()));
@@ -54,18 +54,12 @@ public class CommandManager {
 
     public String execute(ServerDataEvent dataEvent) {
         String json = new String(dataEvent.getData());
-        JsonObject databaseRequest = JsonObjectFactory.getObjectFromJson(json, JsonObject.class);
-        JsonMessage message = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
+        JsonProtocol request = JsonObjectFactory.getObjectFromJson(json, JsonProtocol.class);
+        Optional<JsonProtocol> protocolOptional = Optional.ofNullable(request);
+        String commandName = protocolOptional.map(JsonProtocol::getCommand).orElse("");
+        Command command = commandMap.getOrDefault(commandName, r -> Command.NO_COMMAND);
+        json = protocolOptional.map(JsonObjectFactory::getJsonString).orElse("");
 
-        Optional<JsonMessage> messageOptional = Optional.ofNullable(message);
-        Optional<JsonObject> databaseRequestOptional = Optional.ofNullable(databaseRequest);
-
-        String stringCommand = databaseRequestOptional.map(JsonObject::getCommand)
-                .orElseGet(() -> messageOptional.map(JsonMessage::getCommand).orElse(Command.NO_COMMAND));
-
-        Command command = commandMap.getOrDefault(stringCommand, request -> Command.NO_COMMAND);
-        String jsonString = databaseRequestOptional.map(JsonObjectFactory::getJsonString)
-                .orElseGet(() -> messageOptional.map(JsonObjectFactory::getJsonString).orElse(Command.NO_COMMAND));
-        return command.execute(jsonString);
+        return command.execute(json);
     }
 }

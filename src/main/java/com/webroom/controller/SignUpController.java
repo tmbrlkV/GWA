@@ -1,9 +1,10 @@
 package com.webroom.controller;
 
-import com.webroom.config.DatabaseSocketConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.room.util.entity.User;
 import com.room.util.json.JsonObjectFactory;
+import com.room.util.json.JsonProtocol;
+import com.webroom.config.DatabaseSocketConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,7 +57,7 @@ public class SignUpController {
 
         User user = new User(username, passwordEncoder.encodePassword(password, null));
         String command = "newUser";
-        String json = JsonObjectFactory.getJsonString(command, user);
+        String json = JsonObjectFactory.getJsonString(new JsonProtocol<>(command, user));
         instance.send(json);
 
         String reply = instance.receive();

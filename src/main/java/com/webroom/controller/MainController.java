@@ -1,8 +1,8 @@
 package com.webroom.controller;
 
+import com.room.util.entity.Message;
 import com.webroom.config.SocketConfig;
-import com.webroom.entity.Greeting;
-import com.webroom.entity.Message;
+import com.webroom.entity.MessageStub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -34,9 +34,9 @@ public class MainController {
 
     @MessageMapping("/hello")
     @SendTo("/topic/greetings")
-    public Greeting greeting(Message message) throws Exception {
+    public MessageStub greeting(Message message) throws Exception {
         instance.send(message);
-        return new Greeting("");
+        return new MessageStub("");
     }
 
 

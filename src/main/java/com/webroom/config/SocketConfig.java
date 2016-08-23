@@ -1,10 +1,10 @@
 package com.webroom.config;
 
-import com.webroom.entity.Greeting;
-import com.webroom.entity.Message;
 import com.room.socket.ConnectionProperties;
-import com.room.util.json.JsonMessage;
+import com.room.util.entity.Message;
 import com.room.util.json.JsonObjectFactory;
+import com.room.util.json.JsonProtocol;
+import com.webroom.entity.MessageStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -46,7 +46,7 @@ public class SocketConfig {
 
     public void send(Message message) {
         String command = "message";
-        JsonMessage jsonMessage = new JsonMessage(command, message.getUser(), message.getMessage());
+        JsonProtocol<Message> jsonMessage = new JsonProtocol<>(command, message);
         jsonMessage.setFrom(ConnectionProperties.getProperties().getProperty("room_port"));
         String string = JsonObjectFactory.getJsonString(jsonMessage);
         bufferSend.put(string.getBytes());
@@ -73,10 +73,11 @@ public class SocketConfig {
         String json = new String(bufferReceive.array()).trim();
         bufferReceive.clear();
 
-        JsonMessage objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonMessage.class);
+        JsonProtocol<Message> objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonProtocol.class);
         if (objectFromJson != null) {
             template.convertAndSend("/topic/greetings",
-                    new Greeting(objectFromJson.getUsername() + ": " + objectFromJson.getContent()));
+                    new MessageStub(objectFromJson.getAttachment().getLogin() + ": "
+                            + objectFromJson.getAttachment().getContent()));
         }
     }
 

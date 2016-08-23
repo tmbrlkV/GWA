@@ -2,6 +2,7 @@ package com.webroom.config;
 
 import com.room.util.entity.User;
 import com.room.util.json.JsonObjectFactory;
+import com.room.util.json.JsonProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-
     @Bean
     public ShaPasswordEncoder passwordEncoder() {
         return new ShaPasswordEncoder();
@@ -58,7 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             DatabaseSocketConfig instance = DatabaseSocketConfig.getInstance();
             User user = new User(username);
             String command = "getUserByLogin";
-            String json = JsonObjectFactory.getJsonString(command, user);
+            String json = JsonObjectFactory.getJsonString(new JsonProtocol<>(command, user));
 
             instance.send(json);
             reply = instance.receive();

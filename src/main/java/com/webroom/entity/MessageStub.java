@@ -1,9 +1,9 @@
 package com.webroom.entity;
 
-public class Greeting {
+public class MessageStub {
     private String content;
 
-    public Greeting(String content) {
+    public MessageStub(String content) {
         this.content = content;
     }
 

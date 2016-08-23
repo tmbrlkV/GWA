@@ -1,10 +1,13 @@
 package com.webroom.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.*;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -13,6 +16,13 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @EnableWebSocket
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer implements WebSocketConfigurer {
+    private final SessionHandler sessionHandler;
+
+    @Autowired
+    public WebSocketConfig(SessionHandler sessionHandler) {
+        this.sessionHandler = sessionHandler;
+    }
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
@@ -24,8 +34,12 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer im
         registry.addEndpoint("/hello").withSockJS();
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
+
     @EventListener
     public void onSocketConnected(SessionConnectedEvent event) {
+        WebSocketSession session = (WebSocketSession) event.getSource();
+        logger.debug("Session {}", session);
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
         System.out.println("[Connected] " + sha.getSessionId());
     }
@@ -36,11 +50,9 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer im
         System.out.println("[Disconnected] " + sha.getSessionId());
     }
 
-    @Autowired
-    private CounterHandler counterHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-//        registry.addHandler(counterHandler, "/hello").withSockJS();
+        registry.addHandler(sessionHandler, "/hello").withSockJS();
     }
 }
