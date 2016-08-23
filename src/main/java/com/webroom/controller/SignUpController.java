@@ -1,9 +1,9 @@
 package com.webroom.controller;
 
+import com.chat.util.entity.User;
+import com.chat.util.json.JsonObjectFactory;
+import com.chat.util.json.JsonProtocol;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.room.util.entity.User;
-import com.room.util.json.JsonObjectFactory;
-import com.room.util.json.JsonProtocol;
 import com.webroom.config.DatabaseSocketConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;

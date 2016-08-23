@@ -1,9 +1,9 @@
 package com.webroom.config;
 
+import com.chat.util.entity.Message;
+import com.chat.util.json.JsonObjectFactory;
+import com.chat.util.json.JsonProtocol;
 import com.room.socket.ConnectionProperties;
-import com.room.util.entity.Message;
-import com.room.util.json.JsonObjectFactory;
-import com.room.util.json.JsonProtocol;
 import com.webroom.entity.MessageStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.webroom.controller;
 
-import com.room.util.entity.Message;
+import com.chat.util.entity.Message;
 import com.webroom.config.SocketConfig;
 import com.webroom.entity.MessageStub;
 import org.springframework.beans.factory.annotation.Autowired;

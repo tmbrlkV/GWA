@@ -1,8 +1,8 @@
 package com.webroom.config;
 
-import com.room.util.entity.User;
-import com.room.util.json.JsonObjectFactory;
-import com.room.util.json.JsonProtocol;
+import com.chat.util.entity.User;
+import com.chat.util.json.JsonObjectFactory;
+import com.chat.util.json.JsonProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
