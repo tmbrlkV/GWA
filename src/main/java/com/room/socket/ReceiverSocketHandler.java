@@ -25,7 +25,7 @@ public class ReceiverSocketHandler implements Runnable {
         this.server = server;
         receiver = ZmqContextHolder.getContext().socket(ZMQ.SUB);
         receiver.connect(properties.getProperty("from_butler_address"));
-        receiver.subscribe(ConnectionProperties.getProperties().getProperty("room_port").getBytes());
+        receiver.subscribe(("chat:" + ConnectionProperties.getProperties().getProperty("room_port")).getBytes());
         poller = new ZMQ.Poller(0);
         poller.register(receiver, ZMQ.Poller.POLLIN);
     }

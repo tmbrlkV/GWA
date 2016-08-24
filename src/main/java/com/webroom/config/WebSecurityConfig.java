@@ -58,7 +58,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             DatabaseSocketConfig instance = DatabaseSocketConfig.getInstance();
             User user = new User(username);
             String command = "getUserByLogin";
-            String json = JsonObjectFactory.getJsonString(new JsonProtocol<>(command, user));
+            JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
+            protocol.setFrom("");
+            protocol.setTo("database");
+            String json = JsonObjectFactory.getJsonString(protocol);
 
             instance.send(json);
             reply = instance.receive();
