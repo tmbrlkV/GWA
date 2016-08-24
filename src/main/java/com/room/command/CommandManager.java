@@ -16,14 +16,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandManager {
+    private static Pattern pattern = Pattern.compile("([a-zA-Z]+)(:\\d+){0,2}");
+    private static String DEFAULT_REPLY = "";
     private static Logger logger = LoggerFactory.getLogger(CommandManager.class);
     private SenderSocketHandler sender = new SenderSocketHandler();
-    private String DEFAULT_REPLY = "";
 
     private Map<String, Command> commandMap = new ConcurrentHashMap<String, Command>() {{
-        Command databaseCommand = request -> {
+        put(Command.DATABASE, request -> {
             try (ZMQ.Socket handler = ZmqContextHolder.getContext().socket(ZMQ.SUB)) {
                 Properties properties = ConnectionProperties.getProperties();
                 handler.connect(properties.getProperty("from_butler_address"));
@@ -42,11 +45,8 @@ public class CommandManager {
                 logger.error("Bad database command", e);
             }
             return DEFAULT_REPLY;
-        };
-        put(Command.GET_USER_BY_LOGIN_PASSWORD, databaseCommand);
-        put(Command.GET_USER_BY_LOGIN, databaseCommand);
-        put(Command.NEW_USER, databaseCommand);
-        put(Command.MESSAGE, request -> {
+        });
+        put(Command.CHAT, request -> {
             sender.send(request);
             return DEFAULT_REPLY;
         });
@@ -56,10 +56,17 @@ public class CommandManager {
         String json = new String(dataEvent.getData());
         JsonProtocol request = JsonObjectFactory.getObjectFromJson(json, JsonProtocol.class);
         Optional<JsonProtocol> protocolOptional = Optional.ofNullable(request);
-        String commandName = protocolOptional.map(JsonProtocol::getCommand).orElse("");
-        Command command = commandMap.getOrDefault(commandName, r -> Command.NO_COMMAND);
-        json = protocolOptional.map(JsonObjectFactory::getJsonString).orElse("");
+        String keyTo = protocolOptional.map(JsonProtocol::getTo).orElse(DEFAULT_REPLY);
+        Command command = commandMap.getOrDefault(getServiceName(keyTo), r -> Command.NO_COMMAND);
 
         return command.execute(json);
+    }
+
+    private String getServiceName(String keyTo) {
+        Matcher matcher = pattern.matcher(keyTo);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        return "";
     }
 }

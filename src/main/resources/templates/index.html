@@ -52,7 +52,7 @@
                 return;
             }
             document.getElementById('name').value = "";
-            stompClient.send("/app/hello", {}, JSON.stringify({'user': user, 'message': message}));
+            stompClient.send("/app/hello", {}, JSON.stringify({'login': user, 'content': message}));
         }
 
         function showGreeting(message) {

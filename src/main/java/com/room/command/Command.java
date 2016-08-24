@@ -1,11 +1,9 @@
 package com.room.command;
 
 interface Command {
-    String GET_USER_BY_LOGIN_PASSWORD = "getUserByLoginPassword";
-    String NEW_USER = "newUser";
-    String GET_USER_BY_LOGIN = "getUserByLogin";
-    String MESSAGE = "message";
+    String CHAT = "chat";
     String NO_COMMAND = "";
+    String DATABASE = "database";
 
     String execute(String request);
 }

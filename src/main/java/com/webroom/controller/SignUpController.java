@@ -57,7 +57,10 @@ public class SignUpController {
 
         User user = new User(username, passwordEncoder.encodePassword(password, null));
         String command = "newUser";
-        String json = JsonObjectFactory.getJsonString(new JsonProtocol<>(command, user));
+        JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
+        protocol.setFrom("");
+        protocol.setTo("database");
+        String json = JsonObjectFactory.getJsonString(protocol);
         instance.send(json);
 
         String reply = instance.receive();

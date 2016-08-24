@@ -47,7 +47,8 @@ public class SocketConfig {
     public void send(Message message) {
         String command = "message";
         JsonProtocol<Message> jsonMessage = new JsonProtocol<>(command, message);
-        jsonMessage.setFrom(ConnectionProperties.getProperties().getProperty("room_port"));
+        jsonMessage.setFrom(message.getLogin());
+        jsonMessage.setTo("chat:" + ConnectionProperties.getProperties().getProperty("room_port"));
         String string = JsonObjectFactory.getJsonString(jsonMessage);
         bufferSend.put(string.getBytes());
         bufferSend.flip();

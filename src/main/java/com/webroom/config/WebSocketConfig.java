@@ -53,6 +53,6 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer im
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(sessionHandler, "/hello").withSockJS();
+//        registry.addHandler(sessionHandler, "/hello").withSockJS();
     }
 }
