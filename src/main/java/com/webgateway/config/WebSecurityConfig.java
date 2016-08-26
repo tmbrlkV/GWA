@@ -7,6 +7,7 @@ import com.webgateway.entity.CustomUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.authority.AuthorityUtils;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Configuration
@@ -24,6 +26,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
     @Autowired
     private ShaPasswordEncoder passwordEncoder;
+    @Autowired
+    @Qualifier("databaseSocketConfig")
+    private SocketConfig<String> socketConfig;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -57,24 +62,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private User getAuth(String username) {
         User user = new User(username);
-        try {
-            DatabaseSocketConfig instance = DatabaseSocketConfig.getInstance();
-            String command = "getUserByLogin";
-            JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
-            protocol.setFrom("");
-            protocol.setTo("database");
-            String json = JsonObjectFactory.getJsonString(protocol);
+        String command = "getUserByLogin";
+        JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
+        protocol.setFrom("");
+        protocol.setTo("database");
+        String json = JsonObjectFactory.getJsonString(protocol);
 
-            logger.debug(json);
-            instance.send(json);
-            String reply = instance.receive();
+        logger.debug(json);
+        socketConfig.send(json);
+        try {
+            String reply = socketConfig.receive();
             user = (User) Optional.ofNullable(JsonObjectFactory.getObjectFromJson(reply, JsonProtocol.class))
                     .map(JsonProtocol::getAttachment)
                     .orElseGet(User::new);
-            instance.close();
-        } catch (Exception e) {
-            logger.error("Bad auth", e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
         return user;
     }
 }
