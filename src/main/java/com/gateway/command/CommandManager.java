@@ -33,10 +33,11 @@ public class CommandManager {
                     handler.subscribe(Command.DATABASE.getBytes());
 
                     sender.send(request);
-                    handler.recvStr();
+                    logger.debug("Send to database {}", request);
+                    System.out.println(handler.recvStr());
 
                     String reply = handler.recvStr();
-                    logger.debug(reply);
+                    logger.debug("Receive from database {}", reply);
                     JsonProtocol protocol = JsonObjectFactory.getObjectFromJson(reply, JsonProtocol.class);
                     handler.unsubscribe(Command.DATABASE.getBytes());
                     return JsonObjectFactory.getJsonString(Optional.ofNullable(protocol).orElse(new JsonProtocol()));
@@ -53,8 +54,11 @@ public class CommandManager {
                     handler.connect(properties.getProperty("from_butler_address"));
                     sender.send(request);
                     handler.subscribe(Command.ROOM_MANAGER.getBytes());
-                    handler.recvStr();
+                    logger.debug("Send to RoomManager {}", request);
+                    System.out.println(handler.recvStr());
                     String reply = handler.recvStr();
+                    logger.debug("Receive from RoomManager {}", reply);
+                    handler.unsubscribe(Command.ROOM_MANAGER.getBytes());
                     return JsonObjectFactory.getObjectFromJson(reply, JsonProtocol.class).getFrom();
                 }
             });
