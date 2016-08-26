@@ -1,7 +1,7 @@
 package com.webgateway.controller;
 
 import com.chat.util.entity.Message;
-import com.webgateway.config.SocketConfig;
+import com.webgateway.config.socket.zmq.SocketConfig;
 import com.webgateway.entity.MessageStub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,11 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.IOException;
-
 @Controller
 public class MainController {
-    private static Thread thread;
+    private static Thread receivingThread;
     @Autowired
     @Qualifier("messageSocketConfig")
     private SocketConfig<Message> messageSocket;
@@ -46,18 +44,18 @@ public class MainController {
     }
 
     private void startReceivingThread() {
-        if (thread == null) {
-            thread = new Thread(() -> {
+        if (receivingThread == null) {
+            receivingThread = new Thread(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        messageSocket.receive();
-                    } catch (IOException e) {
-                        thread.interrupt();
-                        thread = null;
-                    }
+//                    try {
+                    messageSocket.receive();
+//                    } catch (IOException e) {
+//                        receivingThread.interrupt();
+//                        receivingThread = null;
+//                    }
                 }
             });
-            thread.start();
+            receivingThread.start();
         }
     }
 }

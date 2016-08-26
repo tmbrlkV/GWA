@@ -1,9 +1,10 @@
-package com.webgateway.config;
+package com.webgateway.config.socket.zmq;
 
 import com.chat.util.entity.Message;
 import com.chat.util.json.JsonObjectFactory;
 import com.chat.util.json.JsonProtocol;
 import com.gateway.socket.ConnectionProperties;
+import com.webgateway.config.socket.web.SessionHandler;
 import com.webgateway.entity.MessageStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,18 +13,17 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.zeromq.ZMQ;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component("messageSocketConfig")
 public final class MessageSocketConfig extends SocketConfig<Message> {
     private static Logger logger = LoggerFactory.getLogger(MessageSocketConfig.class);
-    @Autowired
-    private SessionHandler sessionHandler;
     private List<String> subscriptions = new ArrayList<>();
     private ZMQ.Socket receiver;
     private ZMQ.Socket sender;
+    @Autowired
+    private SessionHandler sessionHandler;
 
     private MessageSocketConfig() {
         super();
@@ -61,13 +61,13 @@ public final class MessageSocketConfig extends SocketConfig<Message> {
     private SimpMessagingTemplate template;
 
     @Override
-    public String receive() throws IOException {
+    public String receive() {
         receive(template);
         return "";
     }
 
 
-    private void receive(SimpMessagingTemplate template) throws IOException {
+    private void receive(SimpMessagingTemplate template) {
         logger.debug("receive(SMT) before read");
         receiver.recvStr();
         String json = receiver.recvStr();

@@ -1,4 +1,4 @@
-package com.webgateway.config;
+package com.webgateway.config.socket.zmq;
 
 import com.gateway.socket.ConnectionProperties;
 import com.gateway.socket.ZmqContextHolder;
@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.zeromq.ZMQ;
 
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.util.Properties;
 
 @Component
@@ -24,7 +23,8 @@ public abstract class SocketConfig<T> {
     }
 
     public abstract void send(T json);
-    public abstract String receive() throws IOException;
+
+    public abstract String receive();
 
     protected ZMQ.Socket getReceiver() {
         return receiver;
