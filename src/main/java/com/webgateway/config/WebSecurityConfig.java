@@ -3,6 +3,7 @@ package com.webgateway.config;
 import com.chat.util.entity.User;
 import com.chat.util.json.JsonObjectFactory;
 import com.chat.util.json.JsonProtocol;
+import com.webgateway.entity.CustomUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,18 +46,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(username -> {
-            String reply = getAuth(username);
-            return new org.springframework.security
-                    .core.userdetails.User(username, reply, AuthorityUtils.createAuthorityList("USER"));
+            User reply = getAuth(username);
+            String password = reply.getPassword();
+            org.springframework.security.core.userdetails.User user = new org.springframework.security
+                    .core.userdetails.User(reply.getLogin(), password, AuthorityUtils.createAuthorityList("USER"));
+            return new CustomUser(reply.getId(), user);
         }).passwordEncoder(passwordEncoder);
     }
 
 
-    private String getAuth(String username) {
-        String reply = "";
+    private User getAuth(String username) {
+        User user = new User(username);
         try {
             DatabaseSocketConfig instance = DatabaseSocketConfig.getInstance();
-            User user = new User(username);
             String command = "getUserByLogin";
             JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
             protocol.setFrom("");
@@ -65,16 +67,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
             logger.debug(json);
             instance.send(json);
-            reply = instance.receive();
+            String reply = instance.receive();
             user = (User) Optional.ofNullable(JsonObjectFactory.getObjectFromJson(reply, JsonProtocol.class))
                     .map(JsonProtocol::getAttachment)
                     .orElseGet(User::new);
-            reply = user.getPassword() + "";
             instance.close();
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Bad auth", e);
         }
-        return reply;
+        return user;
     }
 }

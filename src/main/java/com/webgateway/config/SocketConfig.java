@@ -52,7 +52,8 @@ public class SocketConfig {
     public void send(Message message) {
         String command = "message";
         JsonProtocol<Message> jsonMessage = new JsonProtocol<>(command, message);
-        jsonMessage.setFrom(message.getLogin());
+//        User user = ((CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toUser();
+        jsonMessage.setFrom(String.valueOf(message.getLogin()));
         jsonMessage.setTo("chat:" + ConnectionProperties.getProperties().getProperty("gw_port"));
         String string = JsonObjectFactory.getJsonString(jsonMessage);
         bufferSend.put(string.getBytes());
