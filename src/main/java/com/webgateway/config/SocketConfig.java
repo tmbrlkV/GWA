@@ -7,7 +7,9 @@ import com.gateway.socket.ConnectionProperties;
 import com.webgateway.entity.MessageStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,7 +17,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Properties;
 
+@Component
 public class SocketConfig {
+    @Autowired
+    private SessionHandler sessionHandler;
     private static Logger logger = LoggerFactory.getLogger(SocketConfig.class);
     private SocketChannel socket;
     private static SocketConfig instance;

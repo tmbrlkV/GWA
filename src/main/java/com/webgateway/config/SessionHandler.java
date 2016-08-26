@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @Component
-public class SessionHandler extends TextWebSocketHandler {
+public class SessionHandler {
     private Map<WebSocketSession, Instant> sessions = new ConcurrentHashMap<>();
     private Consumer<WebSocketSession> handler = session -> {
         if (Duration.between(sessions.get(session), Instant.now()).getSeconds() > 15) {
@@ -31,15 +31,12 @@ public class SessionHandler extends TextWebSocketHandler {
     };
     private static Logger logger = LoggerFactory.getLogger(SessionHandler.class);
 
-    @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         logger.debug("After connection {}", session);
         sessions.put(session, Instant.now());
     }
 
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message)
-            throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         logger.debug("Handle {}", session);
         sessions.put(session, Instant.now());
     }

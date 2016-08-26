@@ -9,6 +9,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class MainController {
     private static SocketConfig instance;
 
 
-    @RequestMapping("/init")
+    @RequestMapping(value = "/init")
     public ModelAndView init() throws Exception {
         instance = SocketConfig.getInstance();
         startReceivingThread();
