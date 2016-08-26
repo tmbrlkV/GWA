@@ -3,7 +3,6 @@ package com.webgateway.config.socket.zmq;
 import com.chat.util.entity.Message;
 import com.chat.util.json.JsonObjectFactory;
 import com.chat.util.json.JsonProtocol;
-import com.gateway.socket.ConnectionProperties;
 import com.webgateway.config.socket.web.SessionHandler;
 import com.webgateway.entity.MessageStub;
 import org.slf4j.Logger;
@@ -22,8 +21,12 @@ public final class MessageSocketConfig extends SocketConfig<Message> {
     private List<String> subscriptions = new ArrayList<>();
     private ZMQ.Socket receiver;
     private ZMQ.Socket sender;
+
     @Autowired
     private SessionHandler sessionHandler;
+
+    @Autowired
+    private SimpMessagingTemplate template;
 
     private MessageSocketConfig() {
         super();
@@ -45,20 +48,17 @@ public final class MessageSocketConfig extends SocketConfig<Message> {
         receiver.unsubscribe(unSub.getBytes());
     }
 
+
     @Override
     public void send(Message message) {
         String command = "message";
         JsonProtocol<Message> jsonMessage = new JsonProtocol<>(command, message);
 //        User user = ((CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toUser();
         jsonMessage.setFrom(String.valueOf(message.getLogin()));
-        jsonMessage.setTo("chat:" + ConnectionProperties.getProperties().getProperty("gw_port"));
+        jsonMessage.setTo("chat:15000");
         String string = JsonObjectFactory.getJsonString(jsonMessage);
         sender.send(string);
     }
-
-
-    @Autowired
-    private SimpMessagingTemplate template;
 
     @Override
     public String receive() {

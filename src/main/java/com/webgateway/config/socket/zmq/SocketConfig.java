@@ -1,7 +1,5 @@
 package com.webgateway.config.socket.zmq;
 
-import com.gateway.socket.ConnectionProperties;
-import com.gateway.socket.ZmqContextHolder;
 import org.springframework.stereotype.Component;
 import org.zeromq.ZMQ;
 
