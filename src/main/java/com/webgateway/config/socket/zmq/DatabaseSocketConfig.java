@@ -1,4 +1,4 @@
-package com.webgateway.config;
+package com.webgateway.config.socket.zmq;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

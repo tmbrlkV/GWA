@@ -1,4 +1,4 @@
-package com.webgateway.config;
+package com.webgateway.config.socket.zmq;
 
 import com.chat.util.entity.User;
 import com.chat.util.json.JsonProtocol;
