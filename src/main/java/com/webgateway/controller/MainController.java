@@ -34,9 +34,9 @@ public class MainController {
     @RequestMapping("/out")
     public ModelAndView logout() throws Exception {
         roomManagerSocket.setCommand("removeUserFromAllRooms");
-        roomManagerSocket.send("");
+        roomManagerSocket.send("15000");
         SecurityContextHolder.getContext().setAuthentication(null);
-        return new ModelAndView("login");
+        return new ModelAndView("redirect:/login");
     }
 
     @MessageMapping("/hello")
