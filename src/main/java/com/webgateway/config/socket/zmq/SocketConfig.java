@@ -1,7 +1,5 @@
 package com.webgateway.config.socket.zmq;
 
-import com.gateway.socket.ConnectionProperties;
-import com.gateway.socket.ZmqContextHolder;
 import org.springframework.stereotype.Component;
 import org.zeromq.ZMQ;
 
@@ -12,6 +10,7 @@ import java.util.Properties;
 public abstract class SocketConfig<T> {
     private final ZMQ.Socket sender;
     private final ZMQ.Socket receiver;
+    private String command;
 
     protected SocketConfig() {
         Properties properties = ConnectionProperties.getProperties();
@@ -32,6 +31,14 @@ public abstract class SocketConfig<T> {
 
     protected ZMQ.Socket getSender() {
         return sender;
+    }
+
+    protected String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+
     }
 
     @PreDestroy

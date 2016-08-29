@@ -1,13 +1,13 @@
-package com.gateway.socket;
+package com.webgateway.config.socket.zmq;
 
 import org.zeromq.ZMQ;
 
-public final class ZmqContextHolder {
+final class ZmqContextHolder {
     private static ZMQ.Context context;
 
     private ZmqContextHolder() {}
 
-    public static ZMQ.Context getContext() {
+    static ZMQ.Context getContext() {
         if (context == null) {
             synchronized (ZmqContextHolder.class) {
                 if (context == null) {
