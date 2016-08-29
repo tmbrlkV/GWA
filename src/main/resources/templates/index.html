@@ -79,7 +79,7 @@
         <button id="connect" onclick="connect();">Connect</button>
         <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
     </div>
-    <form th:action="@{/logout}" method="post">
+    <form th:action="@{/out}" method="post">
         <h3 th:inline="text">Hello, [[${#httpServletRequest.remoteUser}]]!</h3>
         <input type="submit" value="Sign Out" onclick="disconnect()"/>
     </form>

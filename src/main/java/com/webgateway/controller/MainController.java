@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -24,15 +25,17 @@ public class MainController {
     @RequestMapping(value = "/init")
     public ModelAndView init() throws Exception {
         startReceivingThread();
-//        roomManagerSocketConfig = RoomManagerSocketConfig.getInstance();
-//        roomManagerSocketConfig.send();
-//        System.out.println(roomManagerSocketConfig.receive());
+        roomManagerSocket.setCommand("addUserToRoom");
+        roomManagerSocket.send("15000");
+        System.out.println(roomManagerSocket.receive());
         return new ModelAndView("redirect:/");
     }
 
-    @RequestMapping("/login")
+    @RequestMapping("/out")
     public ModelAndView logout() throws Exception {
-//        SecurityContextHolder.getContext().setAuthentication(null);
+        roomManagerSocket.setCommand("removeUserFromRoom");
+        roomManagerSocket.send("15000");
+        SecurityContextHolder.getContext().setAuthentication(null);
         return new ModelAndView("login");
     }
 
@@ -47,12 +50,7 @@ public class MainController {
         if (receivingThread == null) {
             receivingThread = new Thread(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
-//                    try {
                     messageSocket.receive();
-//                    } catch (IOException e) {
-//                        receivingThread.interrupt();
-//                        receivingThread = null;
-//                    }
                 }
             });
             receivingThread.start();
