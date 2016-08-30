@@ -22,18 +22,19 @@ public final class MessageSocketConfig extends SocketConfig<Message> {
     private ZMQ.Socket receiver;
     private ZMQ.Socket sender;
 
-    @Autowired
-    private SessionHandler sessionHandler;
+    private final SessionHandler sessionHandler;
+
+    private final SimpMessagingTemplate template;
 
     @Autowired
-    private SimpMessagingTemplate template;
-
-    private MessageSocketConfig() {
+    private MessageSocketConfig(SessionHandler sessionHandler, SimpMessagingTemplate template) {
         super();
         sender = getSender();
         receiver = getReceiver();
         String sub = "chat:15000";
         subscribe(sub);
+        this.sessionHandler = sessionHandler;
+        this.template = template;
     }
 
     public void subscribe(String sub) {

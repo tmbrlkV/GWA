@@ -18,13 +18,13 @@ import java.util.Optional;
 @RestController
 public class SignUpController {
     private final ShaPasswordEncoder passwordEncoder;
-    @Autowired
-    @Qualifier("databaseSocketConfig")
-    private SocketConfig<String> socketConfig;
+    private final SocketConfig<String> socketConfig;
 
     @Autowired
-    public SignUpController(ShaPasswordEncoder passwordEncoder) {
+    public SignUpController(ShaPasswordEncoder passwordEncoder,
+                            @Qualifier("databaseSocketConfig") SocketConfig<String> socketConfig) {
         this.passwordEncoder = passwordEncoder;
+        this.socketConfig = socketConfig;
     }
 
     @RequestMapping("/user")
@@ -47,7 +47,9 @@ public class SignUpController {
         }
     }
 
-    private boolean isEmptyFields(@RequestParam String username, @RequestParam String password, @RequestParam String repeatPassword) {
+    private boolean isEmptyFields(@RequestParam String username,
+                                  @RequestParam String password,
+                                  @RequestParam String repeatPassword) {
         return username == null || password == null || repeatPassword == null
                 || username.equals("") || password.equals("") || repeatPassword.equals("");
     }

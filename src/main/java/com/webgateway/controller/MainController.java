@@ -15,12 +15,15 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class MainController {
     private static Thread receivingThread;
+    private final SocketConfig<Message> messageSocket;
+    private final SocketConfig<String> roomManagerSocket;
+
     @Autowired
-    @Qualifier("messageSocketConfig")
-    private SocketConfig<Message> messageSocket;
-    @Autowired
-    @Qualifier("roomManagerSocketConfig")
-    private SocketConfig<String> roomManagerSocket;
+    public MainController(@Qualifier("roomManagerSocketConfig") SocketConfig<String> roomManagerSocket,
+                          @Qualifier("messageSocketConfig") SocketConfig<Message> messageSocket) {
+        this.roomManagerSocket = roomManagerSocket;
+        this.messageSocket = messageSocket;
+    }
 
     @RequestMapping(value = "/init")
     public ModelAndView init() throws Exception {

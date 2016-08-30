@@ -23,11 +23,15 @@ import java.util.Optional;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+    private final ShaPasswordEncoder passwordEncoder;
+    private final SocketConfig<String> socketConfig;
+
     @Autowired
-    private ShaPasswordEncoder passwordEncoder;
-    @Autowired
-    @Qualifier("databaseSocketConfig")
-    private SocketConfig<String> socketConfig;
+    public WebSecurityConfig(@Qualifier("databaseSocketConfig") SocketConfig<String> socketConfig,
+                             ShaPasswordEncoder passwordEncoder) {
+        this.socketConfig = socketConfig;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -39,6 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().formLogin().loginPage("/login").defaultSuccessUrl("/init", true).permitAll()
                 .and().logout()
                 .permitAll();
+        http.sessionManagement().invalidSessionUrl("/login");
     }
 
     @Autowired
