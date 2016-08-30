@@ -2,59 +2,40 @@ package com.webgateway.config.socket.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-@Component
+@Service("sessionHandler")
 public class SessionHandler {
-    private Map<WebSocketSession, Instant> sessions = new ConcurrentHashMap<>();
-    private Consumer<WebSocketSession> handler = session -> {
-        if (Duration.between(sessions.get(session), Instant.now()).getSeconds() > 15) {
-            sessions.remove(session);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHandler.class);
+
+    private final Map<WebSocketSession, Instant> sessionMap = new ConcurrentHashMap<>();
+
+    public SessionHandler() {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> sessionMap.keySet().forEach(key -> {
             try {
-                logger.debug("Close {}", session);
-                session.close();
+                Instant instant = sessionMap.get(key);
+                if (Duration.between(instant, Instant.now()).getSeconds() >= 15) {
+                    sessionMap.remove(key);
+                    key.close();
+                }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Error while closing websocket session: {}", e);
             }
-        }
-    };
-    private static Logger logger = LoggerFactory.getLogger(SessionHandler.class);
-
-    public void afterConnectionEstablished(WebSocketSession session) {
-        logger.debug("After connection {}", session);
-        sessions.put(session, Instant.now());
+        }), 10, 15, TimeUnit.SECONDS);
     }
 
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        logger.debug("Handle {}", session);
-        sessions.put(session, Instant.now());
-    }
-
-    @PostConstruct
-    public void timeout() {
-        logger.debug("timeout");
-        new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(15000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (sessions.isEmpty()) {
-                    continue;
-                }
-                sessions.keySet().forEach(handler);
-            }
-        }).start();
+    void register(WebSocketSession session) {
+        sessionMap.put(session, Instant.now());
     }
 }

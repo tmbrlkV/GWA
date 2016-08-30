@@ -78,6 +78,6 @@ public class CustomUser implements UserDetails, CredentialsContainer {
     }
 
     public com.chat.util.entity.User toUser() {
-        return new com.chat.util.entity.User(id, user.getUsername(), user.getPassword());
+        return new com.chat.util.entity.User(id, user.getUsername(), "");
     }
 }
