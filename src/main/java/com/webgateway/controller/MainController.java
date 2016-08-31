@@ -31,7 +31,13 @@ public class MainController {
         startReceivingThread();
         roomManagerSocket.setCommand("addUserToRoom");
         roomManagerSocket.send("15000");
-        System.out.println(roomManagerSocket.receive());
+        System.out.println("AddUserToRoom " + roomManagerSocket.receive());
+        roomManagerSocket.setCommand("getAllRooms");
+        roomManagerSocket.send("15000");
+        System.out.println("getAllRooms: " + roomManagerSocket.receive());
+        roomManagerSocket.setCommand("getAllUsers");
+        roomManagerSocket.send("15000");
+        System.out.println("getAllUsers: " + roomManagerSocket.receive());
         return new ModelAndView("redirect:/");
     }
 
@@ -40,6 +46,7 @@ public class MainController {
         roomManagerSocket.setCommand("removeUserFromAllRooms");
         roomManagerSocket.send("15000");
         SecurityContextHolder.getContext().setAuthentication(null);
+        roomManagerSocket.receive();
         return new ModelAndView("redirect:/login");
     }
 
