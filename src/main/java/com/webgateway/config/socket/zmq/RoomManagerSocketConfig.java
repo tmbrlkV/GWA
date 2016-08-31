@@ -25,7 +25,6 @@ public final class RoomManagerSocketConfig extends SocketConfig<String> {
         receiver.subscribe("roomManager".getBytes());
     }
 
-    @Override
     public void setCommand(String command) {
         this.command = command;
         logger.debug("Command Set {}", command);

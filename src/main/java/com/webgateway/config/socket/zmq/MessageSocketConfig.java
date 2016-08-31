@@ -3,7 +3,6 @@ package com.webgateway.config.socket.zmq;
 import com.chat.util.entity.Message;
 import com.chat.util.json.JsonObjectFactory;
 import com.chat.util.json.JsonProtocol;
-import com.webgateway.config.socket.web.SessionHandler;
 import com.webgateway.entity.MessageStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,51 +11,38 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.zeromq.ZMQ;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component("messageSocketConfig")
 public final class MessageSocketConfig extends SocketConfig<Message> {
+    private static final Pattern chatMessageProtocolPattern = Pattern.compile("chat:?(\\d*)");
     private static Logger logger = LoggerFactory.getLogger(MessageSocketConfig.class);
-    private List<String> subscriptions = new ArrayList<>();
     private ZMQ.Socket receiver;
     private ZMQ.Socket sender;
-
-    private final SessionHandler sessionHandler;
+    private String to;
 
     private final SimpMessagingTemplate template;
 
     @Autowired
-    private MessageSocketConfig(SessionHandler sessionHandler, SimpMessagingTemplate template) {
+    private MessageSocketConfig(SimpMessagingTemplate template) {
         super();
         sender = getSender();
         receiver = getReceiver();
-        String sub = "chat:15000";
-        subscribe(sub);
-        this.sessionHandler = sessionHandler;
         this.template = template;
+        receiver.subscribe("chat:".getBytes());
     }
 
-    public void subscribe(String sub) {
-        if (!subscriptions.contains(sub)) {
-            subscriptions.add(sub);
-            receiver.subscribe(sub.getBytes());
-        }
+    public void setCommand(String to) {
+        this.to = to;
     }
-
-    public void unsubscribe(String unSub) {
-        subscriptions.remove(unSub);
-        receiver.unsubscribe(unSub.getBytes());
-    }
-
 
     @Override
     public void send(Message message) {
         String command = "message";
         JsonProtocol<Message> jsonMessage = new JsonProtocol<>(command, message);
-//        User user = ((CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toUser();
         jsonMessage.setFrom(String.valueOf(message.getLogin()));
-        jsonMessage.setTo("chat:15000");
+        jsonMessage.setTo("chat:" + to);
         String string = JsonObjectFactory.getJsonString(jsonMessage);
         sender.send(string);
     }
@@ -74,8 +60,16 @@ public final class MessageSocketConfig extends SocketConfig<Message> {
         String json = receiver.recvStr();
 
         JsonProtocol<Message> objectFromJson = JsonObjectFactory.getObjectFromJson(json, JsonProtocol.class);
+        logger.debug("Receive {}", objectFromJson);
         if (objectFromJson != null) {
-            template.convertAndSend("/topic/greetings",
+            Matcher matcher = chatMessageProtocolPattern.matcher(objectFromJson.getTo());
+            String group = "chat:";
+            if (matcher.matches()) {
+                group = matcher.group(1);
+            }
+            logger.debug("Group {}", group);
+
+            template.convertAndSend("/topic/greetings/" + group,
                     new MessageStub(objectFromJson.getAttachment().getLogin() + ": "
                             + objectFromJson.getAttachment().getContent()));
         }
