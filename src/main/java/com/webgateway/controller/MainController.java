@@ -38,6 +38,9 @@ public class MainController {
         roomManagerSocket.setCommand("getAllUsers");
         roomManagerSocket.send("15000");
         System.out.println("getAllUsers: " + roomManagerSocket.receive());
+        roomManagerSocket.setCommand("getAllUsersInRoom");
+        roomManagerSocket.send("15000");
+        System.out.println("getAllUsersInRoom" + roomManagerSocket.receive());
         return new ModelAndView("redirect:/");
     }
 
