@@ -25,18 +25,17 @@ public final class RoomManagerSocketConfig extends SocketConfig<String> {
         receiver.subscribe("roomManager".getBytes());
     }
 
-    @Override
     public void setCommand(String command) {
         this.command = command;
-        logger.debug("Command Set {}", command);
+//        logger.debug("Command Set {}", command);
     }
 
     @Override
     public void send(String toRoom) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        logger.debug("Principal {}", authentication.getAuthorities());
+//        logger.debug("Principal {}", authentication.getAuthorities());
         User user = ((CustomUser) authentication.getPrincipal()).toUser();
-        logger.debug("Command Send {}", command);
+//        logger.debug("Command Send {}", command);
         JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
         protocol.setFrom(String.valueOf(user.getId()));
         protocol.setTo("roomManager:" + toRoom);

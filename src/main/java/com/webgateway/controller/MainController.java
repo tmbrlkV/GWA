@@ -5,6 +5,7 @@ import com.webgateway.config.socket.zmq.SocketConfig;
 import com.webgateway.entity.MessageStub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +31,13 @@ public class MainController {
         startReceivingThread();
         roomManagerSocket.setCommand("addUserToRoom");
         roomManagerSocket.send("15000");
-        System.out.println(roomManagerSocket.receive());
+        System.out.println("AddUserToRoom " + roomManagerSocket.receive());
+        roomManagerSocket.setCommand("getAllRooms");
+        roomManagerSocket.send("15000");
+        System.out.println("getAllRooms: " + roomManagerSocket.receive());
+        roomManagerSocket.setCommand("getAllUsers");
+        roomManagerSocket.send("15000");
+        System.out.println("getAllUsers: " + roomManagerSocket.receive());
         return new ModelAndView("redirect:/");
     }
 
@@ -39,12 +46,14 @@ public class MainController {
         roomManagerSocket.setCommand("removeUserFromAllRooms");
         roomManagerSocket.send("15000");
         SecurityContextHolder.getContext().setAuthentication(null);
+        roomManagerSocket.receive();
         return new ModelAndView("redirect:/login");
     }
 
-    @MessageMapping("/hello")
-    @SendTo("/topic/greetings")
-    public MessageStub greeting(Message message) throws Exception {
+    @MessageMapping("/hello/{id}")
+    @SendTo("/topic/greetings/{id}")
+    public MessageStub greeting(Message message, @DestinationVariable String id) throws Exception {
+        messageSocket.setCommand(id);
         messageSocket.send(message);
         return new MessageStub("");
     }
