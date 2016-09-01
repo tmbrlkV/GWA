@@ -27,15 +27,12 @@ public final class RoomManagerSocketConfig extends SocketConfig<String> {
 
     public void setCommand(String command) {
         this.command = command;
-//        logger.debug("Command Set {}", command);
     }
 
     @Override
     public void send(String toRoom) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        logger.debug("Principal {}", authentication.getAuthorities());
         User user = ((CustomUser) authentication.getPrincipal()).toUser();
-//        logger.debug("Command Send {}", command);
         JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
         protocol.setFrom(String.valueOf(user.getId()));
         protocol.setTo("roomManager:" + toRoom);
@@ -46,5 +43,21 @@ public final class RoomManagerSocketConfig extends SocketConfig<String> {
     public String receive() {
         receiver.recvStr();
         return receiver.recvStr();
+    }
+
+    public void deleteUserFromAllRooms(User user) {
+        communicate("removeUserFromAllRooms", user);
+    }
+
+    public void addClientToLobby(User user) {
+        communicate("addUserToRoom", user);
+    }
+
+    private void communicate(String command, User user) {
+        JsonProtocol<User> protocol = new JsonProtocol<>(command, user);
+        protocol.setFrom(String.valueOf(user.getId()));
+        protocol.setTo("roomManager:15000");
+        sender.send(protocol.toString());
+        receive();
     }
 }
