@@ -17,6 +17,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url "http://repo.spring.io/libs-release" }
+    maven { url "http://10.66.161.2:60000/repository/maven-public/" }
 }
 
 dependencies {
@@ -43,6 +44,8 @@ dependencies {
 
     compile 'org.slf4j:jcl-over-slf4j:1.7.21'
     compile 'ch.qos.logback:logback-classic:1.1.7'
+
+    compile "edu.test:chat-utils:1.0-RELEASE"
 
     testCompile 'com.h2database:h2:latest.release'
     testCompile 'junit:junit:latest.release'
