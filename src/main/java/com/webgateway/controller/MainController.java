@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,24 +28,20 @@ public class MainController {
     @RequestMapping(value = "/init")
     public ModelAndView init() throws Exception {
         startReceivingThread();
-        roomManagerSocket.setCommand("addUserToRoom");
-        roomManagerSocket.send("15000");
-        System.out.println("AddUserToRoom " + roomManagerSocket.receive());
         roomManagerSocket.setCommand("getAllRooms");
         roomManagerSocket.send("15000");
         System.out.println("getAllRooms: " + roomManagerSocket.receive());
         roomManagerSocket.setCommand("getAllUsers");
         roomManagerSocket.send("15000");
         System.out.println("getAllUsers: " + roomManagerSocket.receive());
+        roomManagerSocket.setCommand("getAllUsersInRoom");
+        roomManagerSocket.send("15000");
+        System.out.println("getAllUsersInRoom" + roomManagerSocket.receive());
         return new ModelAndView("redirect:/");
     }
 
     @RequestMapping("/out")
     public ModelAndView logout() throws Exception {
-        roomManagerSocket.setCommand("removeUserFromAllRooms");
-        roomManagerSocket.send("15000");
-        SecurityContextHolder.getContext().setAuthentication(null);
-        roomManagerSocket.receive();
         return new ModelAndView("redirect:/login");
     }
 

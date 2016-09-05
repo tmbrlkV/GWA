@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 @Service("sessionHandler")
 public class SessionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionHandler.class);
-
     private final Map<WebSocketSession, Instant> sessionMap = new ConcurrentHashMap<>();
 
     public SessionHandler() {
@@ -27,6 +26,7 @@ public class SessionHandler {
                 Instant instant = sessionMap.get(key);
                 if (Duration.between(instant, Instant.now()).getSeconds() >= 15) {
                     sessionMap.remove(key);
+                    LOGGER.debug("Key {}", key.getPrincipal());
                     key.close();
                 }
             } catch (IOException e) {
