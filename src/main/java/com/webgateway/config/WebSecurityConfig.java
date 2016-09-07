@@ -50,9 +50,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(username -> {
             User reply = getAuth(username);
-            String password = reply.getPassword();
             org.springframework.security.core.userdetails.User user = new org.springframework.security
-                    .core.userdetails.User(reply.getLogin(), password, AuthorityUtils.createAuthorityList("USER"));
+                    .core.userdetails.User(reply.getLogin(), reply.getPassword(), AuthorityUtils.createAuthorityList("USER"));
             return new CustomUser(reply.getId(), user);
         }).passwordEncoder(passwordEncoder);
     }
@@ -71,8 +70,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         String reply = socketConfig.receive();
         user = (User) Optional.ofNullable(JsonObjectFactory.getObjectFromJson(reply, JsonProtocol.class))
                 .map(JsonProtocol::getAttachment)
-                .orElseGet(User::new);
-
+                .orElseGet(() -> new User("log", "pass"));
         return user;
     }
 }

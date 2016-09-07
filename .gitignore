@@ -3,8 +3,8 @@
 ### Example user template
 
 # IntelliJ project files
-.idea
-out
-gen
-build
-logs
+.idea/
+out/
+gen/
+build/
+logs/

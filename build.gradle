@@ -17,7 +17,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url "http://repo.spring.io/libs-release" }
-    maven { url "http://10.66.161.2:60000/repository/maven-public/" }
+    maven { url "http://10.66.161.48:60000/repository/maven-public/" }
 }
 
 dependencies {
