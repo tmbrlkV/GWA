@@ -1,25 +1,32 @@
 package com.webgateway.controller;
 
 import com.chat.util.entity.Message;
+import com.chat.util.entity.User;
+import com.webgateway.config.socket.zmq.RoomManagerSocketConfig;
 import com.webgateway.config.socket.zmq.SocketConfig;
+import com.webgateway.entity.CustomUser;
 import com.webgateway.entity.MessageStub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Arrays;
 
 @Controller
 public class MainController {
     private static Thread receivingThread;
     private final SocketConfig<Message> messageSocket;
-    private final SocketConfig<String> roomManagerSocket;
+    private final RoomManagerSocketConfig roomManagerSocket;
 
     @Autowired
-    public MainController(@Qualifier("roomManagerSocketConfig") SocketConfig<String> roomManagerSocket,
+    public MainController(RoomManagerSocketConfig roomManagerSocket,
                           @Qualifier("messageSocketConfig") SocketConfig<Message> messageSocket) {
         this.roomManagerSocket = roomManagerSocket;
         this.messageSocket = messageSocket;
@@ -28,20 +35,17 @@ public class MainController {
     @RequestMapping(value = "/init")
     public ModelAndView init() throws Exception {
         startReceivingThread();
-        roomManagerSocket.setCommand("getAllRooms");
-        roomManagerSocket.send("15000");
-        System.out.println("getAllRooms: " + roomManagerSocket.receive());
-        roomManagerSocket.setCommand("getAllUsers");
-        roomManagerSocket.send("15000");
-        System.out.println("getAllUsers: " + roomManagerSocket.receive());
-        roomManagerSocket.setCommand("getAllUsersInRoom");
-        roomManagerSocket.send("15000");
-        System.out.println("getAllUsersInRoom" + roomManagerSocket.receive());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = ((CustomUser) authentication.getPrincipal()).toUser();
+        roomManagerSocket.addClientToLobby(user);
+        System.out.println(roomManagerSocket.getInfo(user));
+        System.out.println(Arrays.toString(roomManagerSocket.getAllUsersInRoom(user, 15000L)));
         return new ModelAndView("redirect:/");
     }
 
     @RequestMapping("/out")
     public ModelAndView logout() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(null);
         return new ModelAndView("redirect:/login");
     }
 
